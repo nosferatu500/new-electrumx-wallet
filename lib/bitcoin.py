@@ -75,11 +75,11 @@ class NetworkConstants:
     def set_mainnet(cls):
         cls.TESTNET = False
         cls.WIF_PREFIX = 0x80
-        cls.ADDRTYPE_P2PKH = 0
-        cls.ADDRTYPE_P2SH = 5
+        cls.ADDRTYPE_P2PKH = 30
+        cls.ADDRTYPE_P2SH = 33
         cls.SEGWIT_HRP = "bc"
-        cls.HEADERS_URL = "https://headers.electrum.org/blockchain_headers"
-        cls.GENESIS = "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+        cls.HEADERS_URL = "https://github.com/nosferatu500/headers/blob/master/blockchain_headers"
+        cls.GENESIS = "000003201729c2621caf1352ff8374472e2d2bf1762ae4dd3092189fe4cea9e0"
         cls.DEFAULT_PORTS = {'t': '50001', 's': '50002'}
         cls.DEFAULT_SERVERS = read_json_dict('servers.json')
 
@@ -101,10 +101,10 @@ NetworkConstants.set_mainnet()
 ################################## transactions
 
 FEE_STEP = 10000
-MAX_FEE_RATE = 300000
+MAX_FEE_RATE = 10000
 FEE_TARGETS = [25, 10, 5, 2]
 
-COINBASE_MATURITY = 100
+COINBASE_MATURITY = 120
 COIN = 100000000
 
 # supported types of transction outputs
@@ -324,7 +324,7 @@ def hash_160(public_key):
         return md.digest()
 
 
-def hash160_to_b58_address(h160, addrtype, witness_program_version=1):
+def hash160_to_b58_address(h160, addrtype=30, witness_program_version=1):
     s = bytes([addrtype])
     s += h160
     return base_encode(s+Hash(s)[0:4], base=58)

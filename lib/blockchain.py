@@ -26,8 +26,16 @@ import threading
 from . import util
 from . import bitcoin
 from .bitcoin import *
+from .util import print_error, print_msg
 
-MAX_TARGET = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+try:		
+    from ltc_scrypt import getPoWHash
+except ImportError:		
+    print_msg("Warning: ltc_scrypt not available, using fallback")		
+    from .scrypt import scrypt_1024_1_1_80 as getPoWHash
+
+
+MAX_TARGET = 0x00000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 def serialize_header(res):
     s = int_to_hex(res.get('version'), 4) \
@@ -56,6 +64,9 @@ def hash_header(header):
     if header.get('prev_block_hash') is None:
         header['prev_block_hash'] = '00'*32
     return hash_encode(Hash(bfh(serialize_header(header))))
+
+def pow_hash_header(self, header):		
+        return rev_hex(getPoWHash(self.header_to_string(header).decode('hex')).encode('hex'))
 
 
 blockchains = {}
@@ -145,7 +156,7 @@ class Blockchain(util.PrintError):
 
     def verify_header(self, header, prev_header, bits, target):
         prev_hash = hash_header(prev_header)
-        _hash = hash_header(header)
+        _hash = pow_hash_header(header)
         if prev_hash != header.get('prev_block_hash'):
             raise BaseException("prev hash mismatch: %s vs %s" % (prev_hash, header.get('prev_block_hash')))
         if bitcoin.NetworkConstants.TESTNET:
@@ -267,7 +278,7 @@ class Blockchain(util.PrintError):
         if bitcoin.NetworkConstants.TESTNET:
             return 0, 0
         if index == 0:
-            return 0x1d00ffff, MAX_TARGET
+            return 0x1e0ffff0, MAX_TARGET
         first = self.read_header((index-1) * 2016)
         last = self.read_header(index*2016 - 1)
         # bits to target
@@ -281,7 +292,7 @@ class Blockchain(util.PrintError):
         target = bitsBase << (8 * (bitsN-3))
         # new target
         nActualTimespan = last.get('timestamp') - first.get('timestamp')
-        nTargetTimespan = 14 * 24 * 60 * 60
+        nTargetTimespan = 84 * 60 * 60
         nActualTimespan = max(nActualTimespan, nTargetTimespan // 4)
         nActualTimespan = min(nActualTimespan, nTargetTimespan * 4)
         new_target = min(MAX_TARGET, (target * nActualTimespan) // nTargetTimespan)
@@ -301,7 +312,7 @@ class Blockchain(util.PrintError):
         if check_height and self.height() != height - 1:
             return False
         if height == 0:
-            return hash_header(header) == bitcoin.NetworkConstants.GENESIS
+            return pow_hash_header(header) == bitcoin.NetworkConstants.GENESIS
         previous_header = self.read_header(height -1)
         if not previous_header:
             return False

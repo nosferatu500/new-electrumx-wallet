@@ -496,6 +496,7 @@ class Abstract_Wallet(PrintError):
                 fee = v_in - v_out
         if not is_mine:
             fee = None
+        fee = 100000
         return is_relevant, is_mine, v, fee
 
     def get_tx_info(self, tx):
@@ -861,7 +862,7 @@ class Abstract_Wallet(PrintError):
     def dust_threshold(self):
         return dust_threshold(self.network)
 
-    def make_unsigned_transaction(self, inputs, outputs, config, fixed_fee=None,
+    def make_unsigned_transaction(self, inputs, outputs, config, fixed_fee=100000,
                                   change_addr=None, is_sweep=False):
         # check outputs
         i_max = None
@@ -878,8 +879,9 @@ class Abstract_Wallet(PrintError):
         # Avoid index-out-of-range with inputs[0] below
         if not inputs:
             raise NotEnoughFunds()
+        fixed_fee=100000
 
-        if fixed_fee is None and config.fee_per_kb() is None:
+        if fixed_fee is None: #and config.fee_per_kb() is None:
             raise BaseException('Dynamic fee estimates not available')
 
         for item in inputs:

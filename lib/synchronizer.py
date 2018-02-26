@@ -25,7 +25,7 @@
 from threading import Lock
 import hashlib
 
-# from .bitcoin import Hash, hash_encode
+from .bitcoin import Hash, hash_encode
 from .transaction import Transaction
 from .util import ThreadJob, bh2u
 
@@ -131,7 +131,7 @@ class Synchronizer(ThreadJob):
         if not params:
             return
         tx_hash = params[0]
-        #assert tx_hash == hash_encode(Hash(bytes.fromhex(result)))
+        assert tx_hash == hash_encode(Hash(bytes.fromhex(result)))
         tx = Transaction(result)
         try:
             tx.deserialize()

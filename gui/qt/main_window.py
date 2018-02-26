@@ -123,7 +123,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.create_status_bar()
         self.need_update = threading.Event()
 
-        self.decimal_point = config.get('decimal_point', 5)
+        self.decimal_point = config.get('decimal_point', 6)
         self.fee_unit = config.get('fee_unit', 0)
         self.num_zeros     = int(config.get('num_zeros',0))
 
@@ -634,13 +634,13 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         return self.decimal_point
 
     def base_unit(self):
-        assert self.decimal_point in [2, 5, 8]
-        if self.decimal_point == 2:
+        assert self.decimal_point in [0, 3, 6]
+        if self.decimal_point == 0:
             return 'bits'
-        if self.decimal_point == 5:
-            return 'mBTC'
-        if self.decimal_point == 8:
-            return 'BTC'
+        if self.decimal_point == 3:
+            return 'mXVG'
+        if self.decimal_point == 6:
+            return 'XVG'
         raise Exception('Unknown base unit')
 
     def connect_fields(self, window, btc_e, fiat_e, fee_e):
@@ -1173,9 +1173,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         '''Recalculate the fee.  If the fee was manually input, retain it, but
         still build the TX to see if there are enough funds.
         '''
-        if not self.config.get('offline') and self.config.is_dynfee() and not self.config.has_fee_estimates():
-            self.statusBar().showMessage(_('Waiting for fee estimates...'))
-            return False
+        fee = 100000
+        
+        #if not self.config.get('offline') and self.config.is_dynfee() and not self.config.has_fee_estimates():
+        #    self.statusBar().showMessage(_('Waiting for fee estimates...'))
+        #    return False
         freeze_fee = (self.fee_e.isModified()
                       and (self.fee_e.text() or self.fee_e.hasFocus()))
         amount = '!' if self.is_max else self.amount_e.get_amount()
@@ -1198,7 +1200,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             except NotEnoughFunds:
                 self.not_enough_funds = True
                 if not freeze_fee:
-                    self.fee_e.setAmount(None)
+                   self.fee_e.setAmount(None)
                 return
             except BaseException:
                 return
@@ -1206,7 +1208,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             if not freeze_fee:
                 fee = None if self.not_enough_funds else tx.get_fee()
                 self.fee_e.setAmount(fee)
-
             if self.is_max:
                 amount = tx.output_value()
                 self.amount_e.setAmount(amount)
@@ -2611,12 +2612,12 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 return
             edits = self.amount_e, self.fee_e, self.receive_amount_e
             amounts = [edit.get_amount() for edit in edits]
-            if unit_result == 'BTC':
-                self.decimal_point = 8
-            elif unit_result == 'mBTC':
-                self.decimal_point = 5
+            if unit_result == 'XVG':
+                self.decimal_point = 6
+            elif unit_result == 'mXVG':
+                self.decimal_point = 3
             elif unit_result == 'bits':
-                self.decimal_point = 2
+                self.decimal_point = 0
             else:
                 raise Exception('Unknown base unit')
             self.config.set_key('decimal_point', self.decimal_point, True)

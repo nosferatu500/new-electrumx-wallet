@@ -1,0 +1,6 @@
+Collecting scrypt
+  Downloading scrypt-0.8.6.tar.gz (52kB)
+Installing collected packages: scrypt
+  Running setup.py install for scrypt: started
+    Running setup.py install for scrypt: finished with status 'done'
+Successfully installed scrypt
