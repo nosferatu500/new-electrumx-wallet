@@ -22,7 +22,19 @@ set -e
 
 cd tmp
 
-for repo in electrum electrum-locale electrum-icons; do
+for repo in new-electrumx-wallet; do
+    if [ -d $repo ]; then
+	cd $repo
+	git pull
+	git checkout new
+	cd ..
+    else
+	URL=https://github.com/nosferatu500/$repo.git
+	git clone -b new $URL $repo
+    fi
+done
+
+for repo in electrum-locale electrum-icons; do
     if [ -d $repo ]; then
 	cd $repo
 	git pull
@@ -42,7 +54,7 @@ for i in ./locale/*; do
 done
 popd
 
-pushd electrum
+pushd new-electrumx-wallet
 git checkout $BRANCH
 VERSION=`git describe --tags`
 echo "Last commit: $VERSION"
@@ -50,8 +62,8 @@ find -exec touch -d '2000-11-11T11:11:11+00:00' {} +
 popd
 
 rm -rf $WINEPREFIX/drive_c/electrum
-cp -r electrum $WINEPREFIX/drive_c/electrum
-cp electrum/LICENCE .
+cp -r new-electrumx-wallet $WINEPREFIX/drive_c/electrum
+cp new-electrumx-wallet/LICENCE .
 cp -r electrum-locale/locale $WINEPREFIX/drive_c/electrum/lib/
 cp electrum-icons/icons_rc.py $WINEPREFIX/drive_c/electrum/gui/qt/
 

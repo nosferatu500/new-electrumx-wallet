@@ -8,6 +8,7 @@ dist/
 contrib/pyinstaller/
 Electrum.egg-info/
 gui/qt/icons_rc.py
+contrib/build-wine/tmp/
 locale/
 .devlocaltmp/
 *_trial_temp
